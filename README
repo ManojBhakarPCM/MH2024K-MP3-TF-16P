@@ -1,0 +1,52 @@
+recently i bought cheap DFPlayers named MP3-TF-16P, they were very cheap.
+i wanted to created a talking clock.
+
+but there were problems-
+1. No sound
+2. Cannot play file by number.
+3. volume control not working etc.
+
+i searched on internet everywhere about these issues but it seems that no one on internet is finding solution,
+instead everyone is depend on internet itself.
+
+so i digged deep and finaly found solution.
+
+CAUSE OF PROBLEMS-
+problem was that if we send command, the command only works if there is no parameters or parameters are 0x00, 0x00
+every command which needed parameters(such as play file by number, setting volume), did not worked.
+i tried many things, but everything indicated that command was rejected by the module chip.
+
+only reason a command is rejected, can be the checksum error.
+either command is currupted during transmission, which couldnt be the case because jumper wires are too short.
+or we are calculating checksum wrongly,
+
+so i tried varius method to calculate checksum, but failed.
+then bruit forced all possible checksums and aaaila...suceess!
+
+i concluded that correct formula for calculating checksum is just-
+checksum = 0xFFFF - (0xFF + 0x06 + CMD)
+
+while in every library, para1 and para2 are also added in this formula which is not working for this particular chip.
+
+so this is the solution for commands not working which needs parameters,
+
+---------------
+SOLUTION OF NO SOUND
+--------------
+no sound occures when module is not started.
+module does not start without resetting.
+so we need to send reset command first (0x0C) , which does not need parameters.
+and then wait 4-5 senconds. because module need some time to init.
+
+-------------------
+SOLUTION OF VOLUME CONTROL NOT WORKING
+------------------
+every library states that you can set volume from 0x00 to 0x30, which is absolutly wrong!!!
+you can only set volume from decimal 0 to decimal 30, not hex zero to hex 30.
+which means that in hex, you can only set volume from 0x00 to 0x1E
+if you provide higher value than this, the command will be rejected by this particular module.
+
+thanx guys, circulate this post to all over the internet, because i know that no one will bother to find their own solution, everyone is dependent on internet as i was.
+regards, 
+
+ManojBhakarPCM ,(Grad II Teacher of Maths @ GSSS Choulukhan(Didwana->nagaur->rajasthan->India) 
